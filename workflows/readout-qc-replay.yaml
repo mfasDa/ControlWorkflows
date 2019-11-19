@@ -1,0 +1,50 @@
+name: readout-qc-replay
+roles:
+  - name: "readout-role"
+    task:
+      load: readout-replay
+  - name: "internal-dpl-clock"
+    task:
+      load: internal-dpl-clock
+  - name: "readout-proxy"
+    connect:
+      - name: "from_internal-dpl-clock_to_readout-proxy"
+        target: "{{parent}}.internal-dpl-clock:from_internal-dpl-clock_to_readout-proxy"
+        type: "pull"
+      - name: "readout-proxy"
+        target: "ipc:///tmp/readout-pipe-1"
+        type: "sub"
+        rateLogging: "1"
+    task:
+      load: readout-proxy
+  - name: "Dispatcher"
+    connect:
+      - name: "from_readout-proxy_to_Dispatcher"
+        target: "{{parent}}.readout-proxy:from_readout-proxy_to_Dispatcher"
+        type: "pull"
+    task:
+      load: Dispatcher
+  - name: "QC-TASK-RUNNER-EMCALdev"
+    connect:
+      - name: "from_internal-dpl-clock_to_QC-TASK-RUNNER-EMCALdev"
+        target: "{{parent}}.internal-dpl-clock:from_internal-dpl-clock_to_QC-TASK-RUNNER-EMCALdev"
+        type: "pull"
+      - name: "from_Dispatcher_to_QC-TASK-RUNNER-EMCALdev"
+        target: "{{parent}}.Dispatcher:from_Dispatcher_to_QC-TASK-RUNNER-EMCALdev"
+        type: "pull"
+    task:
+      load: QC-TASK-RUNNER-EMCALdev
+  - name: "daqTask-checker"
+    connect:
+      - name: "from_QC-TASK-RUNNER-EMCALdev_to_daqTask-checker"
+        target: "{{parent}}.QC-TASK-RUNNER-EMCALdev:from_QC-TASK-RUNNER-EMCALdev_to_daqTask-checker"
+        type: "pull"
+    task:
+      load: daqTask-checker
+  - name: "internal-dpl-global-binary-file-sink"
+    connect:
+      - name: "from_daqTask-checker_to_internal-dpl-global-binary-file-sink"
+        target: "{{parent}}.daqTask-checker:from_daqTask-checker_to_internal-dpl-global-binary-file-sink"
+        type: "pull"
+    task:
+      load: internal-dpl-global-binary-file-sink

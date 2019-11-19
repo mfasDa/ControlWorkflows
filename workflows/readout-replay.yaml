@@ -1,0 +1,5 @@
+name: "readout-replay-root"
+roles:
+  - name: "readout-role"
+    task:
+      load: "readout-replay"
