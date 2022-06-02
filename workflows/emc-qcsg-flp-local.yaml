@@ -1,0 +1,109 @@
+name: emc-qcsg-flp-local
+vars:
+  dpl_command: >-
+    o2-dpl-raw-proxy -b --session default --dataspec 'x:EMC/RAWDATA;dd:FLP/DISTSUBTIMEFRAME/0' --readout-proxy '--channel-config "name=readout-proxy,type=pull,method=connect,address=ipc:///tmp/stf-builder-dpl-pipe-0,transport=shmem,rateLogging=1"' | o2-dpl-output-proxy -b --session default --dataspec 'x:EMC/RAWDATA;dd:FLP/DISTSUBTIMEFRAME/0' --dpl-output-proxy '--channel-config "name=downstream,type=push,method=bind,address=ipc:///tmp/stf-pipe-0,rateLogging=10,transport=shmem"' | o2-qc -b --session default --config json:///Users/markusfasel/alice/ControlWorkflows/scripts/etc/emc-qcsg-flp.json --remote
+defaults:
+  monitoring_dpl_url: "no-op://"
+  user: "flp"
+  fmq_rate_logging: 0
+  shm_segment_size: 10000000000
+  shm_throw_bad_alloc: false
+  session_id: default
+  resources_monitoring: 15
+roles:
+  - name: "internal-dpl-clock"
+    connect:
+    task:
+      load: emc-qcsg-flp-local-internal-dpl-clock
+  - name: "readout-proxy"
+    connect:
+    - name: from_internal-dpl-clock_to_readout-proxy
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.internal-dpl-clock:from_internal-dpl-clock_to_readout-proxy"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    - name: readout-proxy
+      type: pull
+      transport: shmem
+      target: "::readout-proxy-{{ it }}"
+      rateLogging: "{{ fmq_rate_logging }}"
+    task:
+      load: emc-qcsg-flp-local-readout-proxy
+  - name: "emcrawdata"
+    connect:
+    - name: from_internal-dpl-clock_to_emcrawdata
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.internal-dpl-clock:from_internal-dpl-clock_to_emcrawdata"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    bind:
+    - name: emcrawdata
+      type: sub
+      transport: zeromq
+      addressing: tcp
+      rateLogging: "{{ fmq_rate_logging }}"
+      global: "emcrawdata"
+    task:
+      load: emc-qcsg-flp-local-emcrawdata
+  - name: "qc-task-EMC-RawTask"
+    connect:
+    - name: from_internal-dpl-clock_to_qc-task-EMC-RawTask
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.internal-dpl-clock:from_internal-dpl-clock_to_qc-task-EMC-RawTask"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    - name: from_emcrawdata_to_qc-task-EMC-RawTask
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.emcrawdata:from_emcrawdata_to_qc-task-EMC-RawTask"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    task:
+      load: emc-qcsg-flp-local-qc-task-EMC-RawTask
+  - name: "qc-check-DET-bY90"
+    connect:
+    - name: from_qc-task-EMC-RawTask_to_qc-check-DET-bY90
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.qc-task-EMC-RawTask:from_qc-task-EMC-RawTask_to_qc-check-DET-bY90"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    task:
+      load: emc-qcsg-flp-local-qc-check-DET-bY90
+  - name: "dpl-output-proxy"
+    connect:
+    - name: from_readout-proxy_to_dpl-output-proxy
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.readout-proxy:from_readout-proxy_to_dpl-output-proxy"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    bind:
+    - name: downstream
+      type: push
+      transport: shmem
+      addressing: ipc
+      rateLogging: "{{ fmq_rate_logging }}"
+      global: "downstream-{{ it }}"
+    task:
+      load: emc-qcsg-flp-local-dpl-output-proxy
+  - name: "internal-dpl-injected-dummy-sink"
+    connect:
+    - name: from_qc-check-DET-bY90_to_internal-dpl-injected-dummy-sink
+      type: pull
+      transport: shmem
+      target: "{{ Parent().Path }}.qc-check-DET-bY90:from_qc-check-DET-bY90_to_internal-dpl-injected-dummy-sink"
+      rateLogging: "{{ fmq_rate_logging }}"
+      sndBufSize: 4
+      rcvBufSize: 4
+    task:
+      load: emc-qcsg-flp-local-internal-dpl-injected-dummy-sink
