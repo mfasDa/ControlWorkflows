@@ -34,6 +34,13 @@ bind:
     rateLogging: "{{ fmq_rate_logging }}"
     sndBufSize: 4
     rcvBufSize: 4
+  - name: from_internal-dpl-clock_to_PP-TASK-RUNNER-Calibration
+    type: push
+    transport: shmem
+    addressing: ipc
+    rateLogging: "{{ fmq_rate_logging }}"
+    sndBufSize: 4
+    rcvBufSize: 4
   - name: from_internal-dpl-clock_to_EMC-MERGER-CellTask1l-0
     type: push
     transport: shmem
@@ -106,13 +113,13 @@ command:
     - "--clone"
     - "''"
     - "--config"
-    - "'{{ qc_config_uri }}'"
+    - "'json:///Users/markusfasel/alice/ControlWorkflows/scripts/etc/emc-qcmn-flpepn.json'"
     - "--configKeyValues"
     - "''"
     - "--early-forward-policy"
     - "'never'"
     - "--fairmq-ipc-prefix"
-    - "'@'"
+    - "'/var/folders/kl/dq37_d_x37zbycsk75bntbgr0000gn/T/'"
     - "--fairmq-rate-logging"
     - "'0'"
     - "--fairmq-recv-buffer-size"

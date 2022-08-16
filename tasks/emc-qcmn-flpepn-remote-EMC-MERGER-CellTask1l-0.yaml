@@ -13,7 +13,7 @@ wants:
   cpu: 0.01
   memory: 1
 bind:
-  - name: from_EMC-MERGER-CellTask1l-0_to_qc-check-EMC-CellCheckAmplitude
+  - name: from_EMC-MERGER-CellTask1l-0_to_qc-check-EMC-VmF0
     type: push
     transport: shmem
     addressing: ipc
@@ -71,13 +71,13 @@ command:
     - "--clone"
     - "''"
     - "--config"
-    - "'{{ qc_config_uri }}'"
+    - "'json:///Users/markusfasel/alice/ControlWorkflows/scripts/etc/emc-qcmn-flpepn.json'"
     - "--configKeyValues"
     - "''"
     - "--early-forward-policy"
     - "'never'"
     - "--fairmq-ipc-prefix"
-    - "'@'"
+    - "'/var/folders/kl/dq37_d_x37zbycsk75bntbgr0000gn/T/'"
     - "--fairmq-rate-logging"
     - "'0'"
     - "--fairmq-recv-buffer-size"

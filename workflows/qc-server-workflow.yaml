@@ -39,6 +39,7 @@ defaults:
       - alio2-cr1-qme07
       - alio2-cr1-qme08
       - alio2-cr1-qts01
+      - pc086
   ###############################
   # Logging Panel
   ###############################
