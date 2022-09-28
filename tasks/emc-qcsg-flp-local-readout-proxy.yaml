@@ -13,7 +13,7 @@ wants:
   cpu: 0.01
   memory: 1
 bind:
-  - name: from_readout-proxy_to_dpl-output-proxy
+  - name: from_readout-proxy_to_internal-dpl-injected-dummy-sink
     type: push
     transport: shmem
     addressing: ipc
@@ -75,7 +75,7 @@ command:
     - "--early-forward-policy"
     - "'never'"
     - "--fairmq-ipc-prefix"
-    - "'/var/folders/kl/dq37_d_x37zbycsk75bntbgr0000gn/T/'"
+    - "'@'"
     - "--fairmq-rate-logging"
     - "'0'"
     - "--fairmq-recv-buffer-size"
@@ -120,3 +120,5 @@ command:
     - "'0'"
     - "--workflow-suffix"
     - "''"
+    - "--ready-state-policy"
+    - "'keep'"

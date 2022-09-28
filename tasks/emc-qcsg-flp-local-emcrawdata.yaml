@@ -26,6 +26,7 @@ bind:
     addressing: tcp
     rateLogging: "{{ fmq_rate_logging }}"
     global: "emcrawdata"
+    rcvBufSize: 1
 command:
   shell: true
   log: "{{ log_task_output }}"
@@ -77,13 +78,13 @@ command:
     - "--clone"
     - "''"
     - "--config"
-    - "'json:///Users/markusfasel/alice/ControlWorkflows/scripts/etc/emc-qcsg-flp.json'"
+    - "'{{ qc_config_uri }}'"
     - "--configKeyValues"
     - "''"
     - "--early-forward-policy"
     - "'never'"
     - "--fairmq-ipc-prefix"
-    - "'/var/folders/kl/dq37_d_x37zbycsk75bntbgr0000gn/T/'"
+    - "'@'"
     - "--fairmq-rate-logging"
     - "'0'"
     - "--fairmq-recv-buffer-size"
@@ -139,6 +140,8 @@ command:
     - "'0'"
     - "--orbit-offset-enumeration"
     - "'0'"
+    - "--ready-state-policy"
+    - "'drain'"
     - "--start-value-enumeration"
     - "'0'"
     - "--step-value-enumeration"
